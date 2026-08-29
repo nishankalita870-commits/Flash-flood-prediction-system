@@ -36,6 +36,10 @@ Do NOT import or modify:
     app/grid_utils.py, app/weather_fetch.py, app/terrain_utils.py
 """
 
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from app.explain import explain_cell
 
 import json
@@ -528,10 +532,16 @@ else:
         ),
     )
 
-    explanation = explain_cell(
-        selected_grid,
-        forecast_date.strftime("%Y-%m-%d"),
-    )
+    try:
+        explanation = explain_cell(
+            selected_grid,
+            forecast_date.strftime("%Y-%m-%d"),
+        )
+    except Exception as exc:
+        st.error(
+            f"Explanation failed for {selected_grid} on {forecast_date:%Y-%m-%d}: {exc}"
+        )
+        st.stop()
 
     if explanation.get("error_state") == "no_dem":
         st.warning(explanation["summary"])
